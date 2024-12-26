@@ -87,7 +87,7 @@ kubectl port-forward service/notes-app-service -n notes-app 8000:8000 --address=
 
 ## Resources
 
-This project uses resources and configurations inspired by [TrainWithShubham](https://github.com/LondheShubham153/django-notes-app).
+This project uses resources from [TrainWithShubham](https://github.com/LondheShubham153/django-notes-app).
 
 ---
 
