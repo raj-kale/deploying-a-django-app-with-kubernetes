@@ -16,3 +16,5 @@ sqlparse==0.4.3
 tzdata==2022.7
 virtualenv==20.17.1
 Werkzeug==2.2.2
+django-cors-headers==3.13.0
+
