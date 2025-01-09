@@ -1,30 +1,28 @@
-# Stage 1: Build stage
-FROM python:3.9 AS builder
+FROM python:3.9
 
-# Set working directory for the build stage
 WORKDIR /app/backend
 
-# Copy only the requirements file to install dependencies
-COPY requirements.txt .
+# Copy requirements file first to leverage Docker cache for dependencies
+COPY requirements.txt /app/backend
 
-# Install dependencies in the build stage
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies and Python dependencies in one layer
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /var/lib/apt/lists/*
 
-# Stage 2: Runtime stage
-FROM python:3.9-slim AS runtime
+# Install mysqlclient separately (if not included in requirements.txt)
+#RUN pip install mysqlclient
 
-# Set working directory for the runtime stage
-WORKDIR /app/backend
-
-# Copy installed dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-
-# Copy application code to the runtime image
-COPY . .
+# Copy the entire app code after dependencies to take advantage of Docker layer caching
+COPY . /app/backend
 
 # Expose the application port
 EXPOSE 8000
 
-# Set the default command
+# Optional: Run migrations and make migrations (or do it manually in runtime)
+# RUN python manage.py migrate
+# RUN python manage.py makemigrations
+
+# Specify the default command to run the app (could be `python manage.py runserver` for Django)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
